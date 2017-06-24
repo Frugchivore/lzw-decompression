@@ -10,29 +10,31 @@
 #include <sstream>
 #include <bitset>
 #include <vector>
+#include <cmath>
 
 const unsigned int byte_size = 8;
 const unsigned int code_size = 12;
 const unsigned int init_dict_size = 256;
-typedef std::bitset<byte_size> Byte;
-typedef std::bitset<code_size> Code;
+
+using Byte = std::bitset<byte_size>;
+using Code = std::bitset<code_size>;
 
 
 class LZWDecoder {
 public:
     LZWDecoder();
 
-    std::string decode(const std::fstream& input_file);
-    std::string decode(const std::vector<Code> code_words);
+//    std::string decode(const std::fstream& input_file);
+    std::string decode(const std::vector<Code>& code_words);
 private:
     std::string translate(Code code_word);
-    std::string lzw_decode(const std::vector<Code> code_words);
+    std::string lzw_decode(const std::vector<Code>& code_words);
     void insert_word(std::string word);
 
-
-    unsigned int entries_available_;
+    unsigned int dict_head_;
+    unsigned int max_size_;
     std::string decoded_string_;
-    std::stringstream decoded_buffer_;
+//    std::stringstream decoded_buffer_;
     std::vector<Code> dictionary_;
 
 };

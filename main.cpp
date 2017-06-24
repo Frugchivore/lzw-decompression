@@ -1,16 +1,12 @@
+#include "LZWDecoder.h"
 #include <iostream>
-#include <fstream>
 #include <iomanip>
-#include <vector>
-#include <memory>
-#include <bitset>
 #include <iterator>
-#include <sstream>
 
-const unsigned int byte_size = 8;
-const unsigned int code_size = 12;
-typedef std::bitset<byte_size> Byte;
-typedef std::bitset<code_size> Code;
+
+
+//typedef std::bitset<byte_size> Byte;
+//typedef std::bitset<code_size> Code;
 
 void read_binary_file(const std::string& file_path, std::vector<Byte>& binary_data);
 void read_binary_file_to_code(const std::string& file_path, std::vector<Code>& binary_data);
@@ -18,16 +14,21 @@ void read_binary_file_to_code(const std::string& file_path, std::vector<Code>& b
 template <typename Type>
 void print_vector(std::vector<Type> array);
 
-int main() {
+int main(int argc, char* argv[]) {
+    std::string file_path;
+    if (argc > 1) {
+        file_path = argv[1];
+    } else {
+        file_path = "/home/ndiladjim/source_repository/LZWDecoder/LzwInputData/compressedfile1.z";
+    }
 
-    std::string file_path("./LzwInputData/compressedfile1.z");
     std::vector<Code> codewords;
     read_binary_file_to_code(file_path, codewords);
 
-//    std::vector<Byte> data;
-//    read_binary_file(file_path, data);
-//    print_vector<Byte>(data);
     print_vector<Code>(codewords);
+    LZWDecoder decoder;
+//    std::string output = decoder.decode(codewords);
+//    std::cout << output << std::endl;
     return 0;
 }
 
@@ -88,10 +89,10 @@ void read_binary_file_to_code(const std::string& file_path, std::vector<Code>& c
 
             if (buffer_pos <= 0) {
 
-                ulong index = buffer.to_ulong();
-                std::string output;
-                output = static_cast<char>(index);
-                std::cout << buffer<<" " << index << " " << output << " | ";
+//                ulong index = buffer.to_ulong();
+//                std::string output;
+//                output = static_cast<char>(index);
+//                std::cout << buffer<<" " << index << " " << output << " | ";
                 code_vector.push_back(buffer);
                 buffer.reset();
                 buffer_pos = code_size;
@@ -121,31 +122,33 @@ std::string translate(Code code) {
         output = static_cast<char>(index);
     }
 }
-
-std::string lzw(std::vector<Code> code_array) {
-    std::stringstream output;
-    int dict_head = 256;
-    int count_read = 0;
-    Code old_code = code_array.at(count_read);
-    std::string old_word = translate(old_code);
-    char character = word.at(0);
-    std::string word;
-    while (count_read < code_array.size()) {
-        count_read++;
-        Code curr_code = code_array.at(count_read);
-        if (curr_code.to_ulong() > dict_head) {
-            word = old_word+character;
-        } else {
-            word = translate(curr_code);
-            character = word.at(0);
-            insert_word(dict_head, old_word+character);
-            old_word = word;
-        }
-
-    }
-
-    return output.str();
-}
+//
+//std::string lzw(std::vector<Code> code_array) {
+//    std::stringstream output;
+//    int dict_head = 256;
+//    int count_read = 0;
+//    Code old_code = code_array.at(count_read);
+//    std::string old_word = translate(old_code);
+//    char character = old_word.at(0);
+//    std::string word;
+//    output << word;
+//    while (count_read < code_array.size()) {
+//        count_read++;
+//        Code curr_code = code_array.at(count_read);
+//        if (curr_code.to_ulong() > dict_head) {
+//            word = old_word+character;
+//        } else {
+//            word = translate(curr_code);
+//
+//        }
+//        output << word;
+//        character = word.at(0);
+//        insert_word(dict_head, old_word+character);
+//        old_word = word;
+//    }
+//
+//    return output.str();
+//}
 
 //Read OLD_Code
 //output OLD_Code
