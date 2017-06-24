@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jun 24 10:29:24 2017
+
+@author: ndiladjim
+"""
+import os
+import struct
+import numpy as np
+from os.path import dirname, join
+base_path = os.path.abspath(dirname(dirname(__file__)))
+data_path = join(base_path, 'LzwInputData')
+file_path = join(data_path, 'compressedfile1.z')
+with open(file_path, 'rb') as f:
+    data = f.read()
+
+def print_bytes(b):
+    dta = bin(b)
+    print(dta)
+
+
+def read_input():
+    """We start from a 2 Bytes buffer set to 0.
+    we consume bytes, and set the bits of the buffer until n bits have been set.
+    
+    """
+    buffer = bytes(0,0)

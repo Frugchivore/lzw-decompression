@@ -1,0 +1,5 @@
+.idea/
+.spyproject/
+cmake-build-debug/
+*.pdf
+*.pyc
