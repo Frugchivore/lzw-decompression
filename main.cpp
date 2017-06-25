@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     if (argc > 1) {
         file_path = argv[1];
     } else {
-        file_path = "/home/ndiladjim/source_repository/LZWDecoder/LzwInputData/compressedfile4.z";
+        file_path = "/home/ndiladjim/source_repository/LZWDecoder/LzwInputData/compressedfile3.z";
     }
 //    std::vector<Byte> bytewords;
 //    read_binary_file(file_path, bytewords);
@@ -29,8 +29,15 @@ int main(int argc, char* argv[]) {
 
 //    print_vector<Code>(codewords);
     LZWDecoder decoder;
-    std::string output = decoder.decode(file_path);
-    std::cout << output << std::endl;
+    std::ifstream data_file;
+    data_file.open(file_path,  std::ios::in|std::ios::binary);
+    if (data_file.is_open()) {
+        std::string output = decoder.decode(data_file);
+        data_file.close();
+        std::cout << output << std::endl;
+    }
+
+
     return 0;
 }
 
