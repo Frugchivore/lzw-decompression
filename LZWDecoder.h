@@ -12,7 +12,8 @@
 #include <bitset>
 #include <vector>
 #include <cmath>
-#include "DecoderInterface.h"
+#include "IDecoder.h"
+#include "DecoderFactory.h"
 
 const unsigned int byte_size = 8;
 const unsigned int code_size = 12;
@@ -22,14 +23,14 @@ using Byte = std::bitset<byte_size>;
 using Code = std::bitset<code_size>;
 
 
-class LZWDecoder : public DecoderInterface {
+class LZWDecoder : public IDecoder {
 public:
     LZWDecoder();
-    LZWDecoder(size_t chunk_size);
-    
-     std::string decode(const std::string& file_path) override;
-     std::string decode(const std::vector<Code>& code_words);
-     std::string get_string() override;
+
+    static IDecoder& new_instance() override;
+    std::string decode(const std::string& file_path) override;
+    std::string decode(const std::vector<Code>& code_words);
+    std::string get_string() override;
 private:
     std::string translate(Code code_word);
     void read_code_words(const std::string& file_path, std::vector<Code>& code_vector);
@@ -41,8 +42,8 @@ private:
     size_t chunk_size_;
     std::stringstream decoded_buffer_;
     std::vector<std::string> dictionary_;
-
 };
 
+//DecoderFactory::register_decoder("LZW", LZWDecoder::new_instance);
 
 #endif //LZWCODE_LZWDECODER_H

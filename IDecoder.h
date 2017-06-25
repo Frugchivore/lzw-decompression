@@ -7,9 +7,9 @@
 
 #include <string>
 #include <fstream>
-class DecoderInterface {
+class IDecoder {
 public:
-
+    virtual IDecoder& new_instance()=0;
     virtual std::string decode(const std::string& file_path)=0;
     virtual std::string get_string()=0;
 };
