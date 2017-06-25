@@ -4,15 +4,21 @@
 
 #include "LZWDecoder.h"
 
-LZWDecoder::LZWDecoder() {
+LZWDecoder::LZWDecoder() : DecoderInterface() {
     dict_head_ = init_dict_size;
     max_size_ = std::pow(2,code_size);
-    entries_available = std::pow(2,code_size) - init_dict_size;
-    dictionary_.reserve(entries_available);
+    unsigned int entries_available = max_size_ - init_dict_size;
+    dictionary_ = std::vector<std::string>(entries_available);
 }
 
 std::string LZWDecoder::decode(const std::vector<Code>& code_words) {
-    return lzw_decode(code_words);
+    decoded_buffer_ = std::stringstream();
+    lzw_decode(code_words);
+    return get_string();
+}
+
+std::string LZWDecoder::get_string() {
+    return decoded_buffer_.str();
 }
 
 std::string LZWDecoder::translate(Code code_word) {
@@ -21,43 +27,95 @@ std::string LZWDecoder::translate(Code code_word) {
     if (index < 256) {
         output = static_cast<char>(index);
     } else {
-        output = dictionary_.at(index);
+        output = dictionary_.at(index - init_dict_size);
     }
     return output;
 }
 
 void LZWDecoder::insert_word(std::string word) {
     if (dict_head_ == max_size_) {
-        dictionary_.clear();
+        unsigned int entries_available = max_size_ - init_dict_size;
+        dictionary_ = std::vector<std::string>(entries_available);
         dict_head_ = init_dict_size;
     }
-    dictionary_.at(dict_head_) = word;
+    dictionary_.at(dict_head_-init_dict_size) = word;
     dict_head_++;
 
 }
 
-std::string LZWDecoder::lzw_decode(const std::vector<Code>& code_words) {
-    std::stringstream output;
-    int count_read = 0;
-    Code old_code = code_words.at(count_read);
+void LZWDecoder::lzw_decode(const std::vector<Code>& code_words) {
+    Code old_code = code_words.at(0);
     std::string old_word = translate(old_code);
     char character = old_word.at(0);
     std::string word;
-    output << word;
-    while (count_read < code_words.size()) {
-        count_read++;
-        Code curr_code = code_words.at(count_read);
+    std::string new_entry;
+    decoded_buffer_ << old_word;
+
+    for (std::vector<Code>::const_iterator iter = code_words.begin()+1; iter != code_words.end(); iter++) {
+
+        Code curr_code = *iter;
+        if (iter == code_words.end()-1)
+            std::cout << curr_code;
         if (curr_code.to_ulong() > dict_head_) {
             word = old_word+character;
         } else {
             word = translate(curr_code);
-
         }
-        output << word;
-        character = word.at(0);
-        insert_word(old_word+character);
+        decoded_buffer_ << word;
+        if (word.size() > 0) {
+            character = word.at(0);
+        } else {
+            character = '\0';
+        }
+        new_entry = old_word+character;
+        insert_word(new_entry);
         old_word = word;
     }
-    decoded_string_ = output.str();
-    return decoded_string_;
+}
+
+std::string LZWDecoder::decode(const std::string& file_path) {
+    decoded_buffer_ = std::stringstream();
+    std::vector<Code> code_words;
+    read_code_words(file_path, code_words);
+    lzw_decode(code_words);
+    return get_string();
+}
+
+
+void LZWDecoder::read_code_words(const std::string &file_path, std::vector<Code> &code_vector) {
+    std::ifstream data_file;
+    data_file.open(file_path,  std::ios::in|std::ios::binary|std::ios::ate);
+    if (data_file.is_open()) {
+        std::streampos size = data_file.tellg();
+        data_file.seekg(0, std::ios::beg);
+        char memblock[1];
+        data_file.read(memblock, sizeof(memblock));
+        Byte current_byte(memblock[0]);
+        Code buffer;
+        int buffer_pos = code_size;
+        int byte_pos = byte_size;
+        int consumed = 0;
+        while (consumed < size) {
+            byte_pos--;
+            bool bit = current_byte.test(byte_pos);
+            if (byte_pos <= 0) {
+                data_file.read(memblock, sizeof(memblock));
+                current_byte = Byte(memblock[0]);
+                consumed++;
+                byte_pos = byte_size;
+            }
+
+            buffer_pos--;
+            buffer.set(buffer_pos, bit);
+            if (buffer_pos <= 0) {
+                code_vector.push_back(buffer);
+                buffer.reset();
+                buffer_pos = code_size;
+            }
+        }
+        data_file.close();
+    } else {
+        std::cerr << "error, could not open file" << std::endl;
+    }
+
 }

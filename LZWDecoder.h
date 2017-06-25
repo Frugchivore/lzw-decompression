@@ -5,12 +5,14 @@
 #ifndef LZWCODE_LZWDECODER_H
 #define LZWCODE_LZWDECODER_H
 
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <bitset>
 #include <vector>
 #include <cmath>
+#include "DecoderInterface.h"
 
 const unsigned int byte_size = 8;
 const unsigned int code_size = 12;
@@ -20,22 +22,25 @@ using Byte = std::bitset<byte_size>;
 using Code = std::bitset<code_size>;
 
 
-class LZWDecoder {
+class LZWDecoder : public DecoderInterface {
 public:
     LZWDecoder();
-
-//    std::string decode(const std::fstream& input_file);
-    std::string decode(const std::vector<Code>& code_words);
+    LZWDecoder(size_t chunk_size);
+    
+     std::string decode(const std::string& file_path) override;
+     std::string decode(const std::vector<Code>& code_words);
+     std::string get_string() override;
 private:
     std::string translate(Code code_word);
-    std::string lzw_decode(const std::vector<Code>& code_words);
+    void read_code_words(const std::string& file_path, std::vector<Code>& code_vector);
+    void lzw_decode(const std::vector<Code>& code_words);
     void insert_word(std::string word);
-
+//
     unsigned int dict_head_;
     unsigned int max_size_;
-    std::string decoded_string_;
-//    std::stringstream decoded_buffer_;
-    std::vector<Code> dictionary_;
+    size_t chunk_size_;
+    std::stringstream decoded_buffer_;
+    std::vector<std::string> dictionary_;
 
 };
 
